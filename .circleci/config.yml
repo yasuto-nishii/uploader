@@ -411,14 +411,16 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Clone Autotest and Start Acceptance Testing Containers
-        command: |
-          cd ..
-          git clone --depth 5 ssh://git@github.com/codecov/autotest.git
-          cd autotest/
-          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker-compose -f docker-compose-acceptance.yml up -d
-          # sleep 10
+          name: Clone Autotest and Start Acceptance Testing Containers
+          command: |
+            cd ..
+            git clone --depth 5 ssh://git@github.com/codecov/autotest.git
+            cd autotest/
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker-compose -f docker-compose-acceptance.yml up -d
+            sleep 10
+            docker ps
+            docker images
       # - run:
       #     name: Standards Coverage Comparison
       #     command: make -f Makefile.circle run-standards-comparison
