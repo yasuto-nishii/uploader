@@ -430,7 +430,7 @@ workflows:
 
   'Build and Test':
     jobs:
-      - standards-coverage-comparison
+      - standards-coverage-comparison:
           context:
             - "DockerHub Push Context"
       - build-linux-and-osx
