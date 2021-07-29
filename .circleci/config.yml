@@ -422,7 +422,7 @@ jobs:
             echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker-compose -f docker-compose-acceptance.yml up -d
             sleep 10
-            docker ps
+            docker ps 
             docker images
       - run:
           name: Standards Coverage Comparison
