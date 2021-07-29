@@ -1,0 +1,11 @@
+services:
+  minio: 
+    hash_key: ab164bf3f7d947f2a0681b215404873e
+    host: 'minio'
+    port: 9000
+    access_key_id: codecov-default-key
+    secret_access_key: codecov-default-secret
+    client_uploads: true
+site:
+  codecov:
+    max_report_age: off

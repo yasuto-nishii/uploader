@@ -21,3 +21,7 @@ build:
 	npm run build-macos
 
 .PHONY: clean install test build
+
+run-standards-comparison:
+	docker pull codecov/autotest:standards-latest
+	docker run --network autotest_codecov -e HOST_URL='http://web:5000' codecov/autotest:standards-latest

@@ -424,9 +424,11 @@ jobs:
             sleep 10
             docker ps
             docker images
-      # - run:
-      #     name: Standards Coverage Comparison
-      #     command: make -f Makefile.circle run-standards-comparison
+      - run:
+          name: Standards Coverage Comparison
+          command: |
+            make run-standards-comparison
+            docker logs autotest_worker_1
 
 workflows:
   version: 2
