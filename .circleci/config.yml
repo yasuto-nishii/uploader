@@ -436,6 +436,7 @@ workflows:
       - standards-coverage-comparison:
           context:
             - "DockerHub Push Context"
+            - "Github Checkout"
       - build-linux-and-osx
       - build-alpine:
           requires:
