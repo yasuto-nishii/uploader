@@ -5,13 +5,13 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.4.0
+  win: circleci/windows@2.4.1
 
 jobs:
   build-linux-and-osx:
     docker:
       # specify the version you desire here
-      - image: circleci/node:16.5.0
+      - image: circleci/node:16.7.0
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -55,7 +55,7 @@ jobs:
   build-alpine:
     docker:
       # specify the version you desire here
-      - image: alpine:3.14.0
+      - image: alpine:3.14.1
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -73,7 +73,7 @@ jobs:
       - run:
           name: Download prebuilt static node binary
           command: |
-            apk add wget coreutils
+            apk add wget coreutils make
             NODE_RELEASE=node.v16.2.0_b57a0d7c9ecba551879997ac44bba3c9d9443df5
             wget https://github.com/codecov/node-static-alpine/releases/download/$NODE_RELEASE/node
             wget https://github.com/codecov/node-static-alpine/releases/download/$NODE_RELEASE/SHA1SUM
@@ -104,7 +104,7 @@ jobs:
 
       - run:
           name: Build uploader binary on alpine
-          command: npm run build-alpine
+          command: make build_alpine
 
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
@@ -119,7 +119,7 @@ jobs:
   test-alpine:
     docker:
       # specify the version you desire here
-      - image: alpine:3.14.0
+      - image: alpine:3.14.1
     steps:
       - run:
           name: Install git
@@ -133,15 +133,15 @@ jobs:
       - run:
           name: Run Alpine binary -f (dry run)
           command: |
-            NODE_DEBUG=vm out/codecov-alpine -f /root/project/coverage-alpine/cobertura-coverage.xml -F alpine -d -Z -e CIRCLE_BRANCH >> output_alpine.txt
+            NODE_DEBUG=vm out/codecov-alpine -v -f /root/project/coverage-alpine/cobertura-coverage.xml -F alpine -d -Z -e CIRCLE_BRANCH >> output_alpine.txt
       - run:
           name: Run Alpine binary auto-detect (dry run)
           command: |
-            out/codecov-alpine -F alpine -d -Z -e CIRCLE_BRANCH >> output_alpine.txt
+            out/codecov-alpine -F alpine -v -d -Z -e CIRCLE_BRANCH >> output_alpine.txt
       - run:
           name: Run Alpine binary (upload)
           command: |
-            out/codecov-alpine -F alpine -Z -e CIRCLE_BRANCH
+            out/codecov-alpine -F alpine -v -Z -e CIRCLE_BRANCH
 
       - store_artifacts:
           path: output_alpine.txt
@@ -159,12 +159,20 @@ jobs:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: .
+      # https://superuser.com/a/1620000/54442
+      - run:
+          name: Install and set Node 16.x
+          command: |
+            $ErrorActionPreference="Stop"
+            nvm arch
+            nvm install 16 all
+            nvm use 16
       - run:
           name: Build Windows Binary
           command: |
-            npm ci
-            npm test
-            npm run build-windows
+            $ErrorActionPreference="Stop"
+            node --version
+            npm ci; npm test; npm run build; npm run build-windows
 
       - persist_to_workspace:
           root: .
@@ -175,7 +183,7 @@ jobs:
   test-linux:
     docker:
       # specify the version you desire here
-      - image: circleci/node:16.5.0
+      - image: circleci/node:16.7.0
     steps:
       - checkout
       - attach_workspace:
@@ -202,7 +210,7 @@ jobs:
 
   test-linux-without-git:
     docker:
-      - image: circleci/node:16.5.0
+      - image: circleci/node:16.7.0
     steps:
       - checkout
       - attach_workspace:
@@ -239,11 +247,11 @@ jobs:
       - run:
           name: Run MacOS binary auto-detect (dry-run)
           command: |
-            out/codecov-macos -F macos -d -Z -e CIRCLE_BRANCH >> output_osx.txt
+            out/codecov-macos -F macos -v -d -Z -e CIRCLE_BRANCH >> output_osx.txt
       - run:
           name: Run MacOS binary (upload)
           command: |
-            out/codecov-macos -F macos -Z -e CIRCLE_BRANCH
+            out/codecov-macos -F macos -v -Z -e CIRCLE_BRANCH
 
       - persist_to_workspace:
           root: .
@@ -290,12 +298,12 @@ jobs:
       - run:
           name: Run Windows binary auto-detect (dry-run)
           command: |
-            .\out\codecov.exe -F windows -d -Z -e CIRCLE_BRANCH >> output_win.txt
+            .\out\codecov.exe -F windows -v -d -Z -e CIRCLE_BRANCH >> output_win.txt
           shell: cmd.exe
       - run:
           name: Run Windows binary (upload)
           command: |
-            .\out\codecov.exe -F windows -Z -e CIRCLE_BRANCH
+            .\out\codecov.exe -F windows -v -Z -e CIRCLE_BRANCH
           shell: cmd.exe
 
       - persist_to_workspace:
@@ -331,7 +339,7 @@ jobs:
 
   review:
     docker:
-      - image: circleci/node:16.5.0
+      - image: circleci/node:16.7.0
     steps:
       - attach_workspace:
           at: .
@@ -362,7 +370,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/node:16.5.0
+      - image: circleci/node:16.7.0
     steps:
       - attach_workspace:
           at: .
@@ -395,7 +403,7 @@ jobs:
             - release_tag
   release:
     docker:
-      - image: google/cloud-sdk:350.0.0-slim
+      - image: google/cloud-sdk:354.0.0-slim
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
