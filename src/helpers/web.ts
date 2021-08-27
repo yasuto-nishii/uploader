@@ -1,5 +1,8 @@
 import { snakeCase } from 'snake-case'
-import superagent from 'superagent'
+import * as superagent from 'superagent'
+import enableProxy from 'superagent-proxy';
+enableProxy(superagent)
+const proxy = process.env.http_proxy || ''
 
 import { version } from '../../package.json'
 import { IServiceParams, UploaderArgs, UploaderInputs } from '../types'
@@ -51,10 +54,11 @@ export async function uploadToCodecovPUT(
   info('Uploading...')
 
   const { putURL, resultURL } = parsePOSTResults(uploadURL)
-
+  
   try {
     const result = await superagent
       .put(`${putURL}`)
+      .proxy(proxy)
       .retry()
       .send(uploadFile)
       .set('Content-Type', 'text/plain')
@@ -87,7 +91,8 @@ export async function uploadToCodecov(
       `${uploadURL}/upload/v4?package=${getPackage(
         source,
       )}&token=${token}&${query}`,
-    )
+    )    
+    .proxy(proxy)
     .retry()
     .set('X-Upload-Token', token)
     .set('X-Reduced-Redundancy', 'false')
